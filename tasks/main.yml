@@ -1,17 +1,5 @@
 ---
-# tasks file for ansible-role-interworx
 
-#- name: Check Existance of iworx.ini
-#  stat:
-#    path="/home/interworx/iworx.ini"
-#  register: iworx_ini
-#
-#- name: Check if License Activation Has Already Run
-#  shell: grep goiworx ~iworx/iworx.ini
-#  register: license_check
-#  when:
-#    - iworx_ini.stat.exists
-#
 - name: Check Variables
   fail:
     msg="iw_master_email, iw_master_password, and iw_license_key must all be defined when iw_activate_license is true"
@@ -124,12 +112,11 @@
     validate_certs: "no"
   register: login
     
-- name: Test Logging Into Interworx
+- name: Test Logging Into Interworx Step 2
   uri: 
     url: "https://{{ ansible_default_ipv4.address }}:2443/nodeworx/dns"
     follow_redirects: "all"
     headers: 
       Cookie: "{{ login.set_cookie }}"
     validate_certs: "no"
-  register: login2
 
