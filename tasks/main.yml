@@ -1,0 +1,135 @@
+---
+# tasks file for ansible-role-interworx
+
+#- name: Check Existance of iworx.ini
+#  stat:
+#    path="/home/interworx/iworx.ini"
+#  register: iworx_ini
+#
+#- name: Check if License Activation Has Already Run
+#  shell: grep goiworx ~iworx/iworx.ini
+#  register: license_check
+#  when:
+#    - iworx_ini.stat.exists
+#
+- name: Check Variables
+  fail:
+    msg="iw_master_email, iw_master_password, and iw_license_key must all be defined when iw_activate_license is true"
+  when: 
+    - iw_master_password == "" or iw_master_email == "" or iw_license_key == ""
+    - iw_activate_license
+
+- name: Install Interworx
+  shell: >
+    curl -sL {{ iw_install_script_url }} > iworx-cp-install.sh && 
+    sh iworx-cp-install.sh -l -r {{ iw_release_channel }}
+  become: yes
+  async: 1500
+  register: iworx_install_result
+
+- name: Check Interworx Install Script Result
+  debug:
+    var=iworx_install_result.stdout_lines
+  failed_when: true
+  when:
+    - iworx_install_result.rc != 0
+
+- name: Activate Interworx License
+  shell: >
+    ~iworx/bin/goiworx.pex 
+    --key={{ iw_license_key }}
+    --email={{ iw_master_email }}
+    --password={{ iw_master_password }}
+    --ignorechecks 
+  become: yes
+  failed_when: false
+  register: goiworx_result
+  when:
+    - iw_activate_license
+
+- name: Check Interworx License Activation Result
+  debug:
+    var=goiworx_result.stdout_lines
+  failed_when: true
+  when:
+    - iw_activate_license
+    - goiworx_result.rc != 0
+
+
+- name: Install Interworx CLI
+  package:
+    name="interworx-cli"
+    state="latest"
+
+- name: Accept Interworx EULA
+  ini_file:
+    path="/home/interworx/iworx.ini"
+    section="iworx"
+    option="firstrun"
+    value="\"0\""
+    no_extra_spaces="yes"
+  when:
+    - iw_accept_eula
+
+- name: Set iworx.ini ns1
+  ini_file:
+    path="/home/interworx/iworx.ini"
+    section="dns"
+    option="ns1"
+    value="\"{{ iw_ns1 }}\""
+    no_extra_spaces="yes"
+  when:
+    - iw_ns1 != ""
+
+- name: Set iworx.ini ns2
+  ini_file:
+    path="/home/interworx/iworx.ini"
+    section="dns"
+    option="ns2"
+    value="\"{{ iw_ns2 }}\""
+    no_extra_spaces="yes"
+  when:
+    - iw_ns2 != ""
+
+- name: Set iworx.ini ns3
+  ini_file:
+    path="/home/interworx/iworx.ini"
+    section="dns"
+    option="ns3"
+    value="\"{{ iw_ns3 }}\""
+    no_extra_spaces="yes"
+  when:
+    - iw_ns3 != ""
+
+- name: Set Default NS
+  command: >
+    nodeworx 
+    -un 
+    -c Dns 
+    -a defaultServers 
+    --ns1="{{ iw_ns1 }}" 
+    --ns2="{{ iw_ns2 }}" 
+    --ns3="{{ iw_ns3 }}"
+  when:
+    - iw_ns1 != "" or iw_ns2 != "" or iw_ns3 != ""
+
+- name: Test Logging Into Interworx
+  uri: 
+    url: "https://{{ ansible_default_ipv4.address }}:2443/nodeworx/?action=login"
+    method: "POST"
+    body: "email={{ iw_master_email|urlencode() }}&password={{ iw_master_password|urlencode() }}"
+    status_code: 302
+    headers: 
+      Content-Type: "application/x-www-form-urlencoded"
+    validate_certs: "no"
+  register: login
+    
+- name: Test Logging Into Interworx
+  uri: 
+    url: "https://{{ ansible_default_ipv4.address }}:2443/nodeworx/dns"
+    follow_redirects: "all"
+    headers: 
+      Cookie: "{{ login.set_cookie }}"
+    validate_certs: "no"
+  register: login2
+
