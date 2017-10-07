@@ -3,13 +3,13 @@
 - name: Check Variables
   fail:
     msg="iw_master_email, iw_master_password, and iw_license_key must all be defined when iw_activate_license is true"
-  when: 
+  when:
     - iw_master_password == "" or iw_master_email == "" or iw_license_key == ""
     - iw_activate_license
 
 - name: Install Interworx
   shell: >
-    curl -sL {{ iw_install_script_url }} > iworx-cp-install.sh && 
+    curl -sL {{ iw_install_script_url }} > iworx-cp-install.sh &&
     sh iworx-cp-install.sh -l -r {{ iw_release_channel }}
   become: yes
   async: 1500
@@ -22,18 +22,30 @@
   when:
     - iworx_install_result.rc != 0
 
+- name: Seed /etc/hosts With Correct License IP
+  lineinfile:
+    path="/etc/hosts"
+    line="207.32.181.150 license.interworx.info license.interworx.com"
+    insertafter="EOF"
+
 - name: Activate Interworx License
   shell: >
-    ~iworx/bin/goiworx.pex 
+    ~iworx/bin/goiworx.pex
     --key={{ iw_license_key }}
     --email={{ iw_master_email }}
     --password={{ iw_master_password }}
-    --ignorechecks 
+    --ignorechecks
   become: yes
   failed_when: false
   register: goiworx_result
   when:
     - iw_activate_license
+
+- name: Remove Seed Line From /etc/hosts
+  lineinfile:
+    state="absent"
+    path="/etc/hosts"
+    line="207.32.181.150 license.interworx.info license.interworx.com"
 
 - name: Check Interworx License Activation Result
   debug:
@@ -91,32 +103,31 @@
 
 - name: Set Default NS
   command: >
-    nodeworx 
-    -un 
-    -c Dns 
-    -a defaultServers 
-    --ns1="{{ iw_ns1 }}" 
-    --ns2="{{ iw_ns2 }}" 
+    nodeworx
+    -un
+    -c Dns
+    -a defaultServers
+    --ns1="{{ iw_ns1 }}"
+    --ns2="{{ iw_ns2 }}"
     --ns3="{{ iw_ns3 }}"
   when:
     - iw_ns1 != "" or iw_ns2 != "" or iw_ns3 != ""
 
 - name: Test Logging Into Interworx
-  uri: 
+  uri:
     url: "https://{{ ansible_default_ipv4.address }}:2443/nodeworx/?action=login"
     method: "POST"
     body: "email={{ iw_master_email|urlencode() }}&password={{ iw_master_password|urlencode() }}"
     status_code: 302
-    headers: 
+    headers:
       Content-Type: "application/x-www-form-urlencoded"
     validate_certs: "no"
   register: login
-    
+
 - name: Test Logging Into Interworx Step 2
-  uri: 
+  uri:
     url: "https://{{ ansible_default_ipv4.address }}:2443/nodeworx/dns"
     follow_redirects: "all"
-    headers: 
+    headers:
       Cookie: "{{ login.set_cookie }}"
     validate_certs: "no"
-
