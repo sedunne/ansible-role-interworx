@@ -131,3 +131,29 @@
     headers:
       Cookie: "{{ login.set_cookie }}"
     validate_certs: "no"
+
+- name: Make Theme Dir
+  file:
+    path="{{ iw_homedir }}/siteworx/smarty/templates/{{ iw_theme_name }}"
+    state="directory"
+    mode=0711
+  when: iw_theme_name != "" and iw_theme_git_repo != ""
+
+- name: Install SiteWorx Theme
+  git:
+    force="yes"
+    update="yes"
+    depth="1"
+    repo="{{ iw_theme_git_repo }}"
+    version="{{ iw_theme_git_version | default('master') }}"
+    dest="{{ iw_homedir }}/siteworx/smarty/templates/{{ iw_theme_name }}"
+  when: iw_theme_name != "" and iw_theme_git_repo != ""
+
+- name: Set Theme as Default
+  command: >
+    nodeworx -un
+    -c Users
+    -a edit
+    --user {{ iw_master_email }}
+    --theme {{ iw_theme_name }}
+  when: iw_theme_name != "" and iw_theme_git_repo != ""
