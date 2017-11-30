@@ -2,12 +2,13 @@
 # defaults file for ansible-role-interworx
 
 # Interworx release channel to install from.
-# Options: 
+# Options:
 #   stable
 #   release
 #   release-candidate
 #   beta
 iw_release_channel: "release"
+iw_homedir: "/usr/local/interworx"
 
 # Activate Interworx License
 iw_activate_license: true
@@ -30,3 +31,8 @@ iw_accept_eula: true
 
 # Interworx install script url
 iw_install_script_url: "interworx.com/inst.sh"
+
+# Custom IWorx theme
+iw_theme_name: ""
+iw_theme_git_repo: ""
+iw_theme_git_version: ""
