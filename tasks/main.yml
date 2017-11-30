@@ -163,6 +163,7 @@
       -a add
       --archive {{ iw_homedir }}/tmp/{{ iw_theme_name }}.zip
   when: iw_theme_name != "" and iw_theme_git_repo != ""
+  ignore_errors: true
 
 - name: Set Theme as Default
   command: >
@@ -172,3 +173,4 @@
     --user {{ iw_master_email }}
     --theme {{ iw_theme_name }}
   when: iw_theme_name != "" and iw_theme_git_repo != ""
+  ignore_errors: true
