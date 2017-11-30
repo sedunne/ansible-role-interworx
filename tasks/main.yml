@@ -142,7 +142,6 @@
 - name: Install SiteWorx Theme
   git:
     force="yes"
-    update="yes"
     depth="1"
     repo="{{ iw_theme_git_repo }}"
     version="{{ iw_theme_git_version | default('master') }}"
