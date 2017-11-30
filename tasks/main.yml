@@ -132,13 +132,6 @@
       Cookie: "{{ login.set_cookie }}"
     validate_certs: "no"
 
-- name: Make Theme Dir
-  file:
-    path="{{ iw_homedir }}/siteworx/smarty/templates/{{ iw_theme_name }}"
-    state="directory"
-    mode=0711
-  when: iw_theme_name != "" and iw_theme_git_repo != ""
-
 - name: Get Theme
   git:
     force="yes"
