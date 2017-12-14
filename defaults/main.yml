@@ -8,7 +8,6 @@
 #   release-candidate
 #   beta
 iw_release_channel: "release"
-iw_homedir: "/usr/local/interworx"
 
 # Activate Interworx License
 iw_activate_license: true
@@ -36,3 +35,9 @@ iw_install_script_url: "interworx.com/inst.sh"
 iw_theme_name: ""
 iw_theme_git_repo: ""
 iw_theme_git_version: ""
+iw_theme_tmp_dir: "{{ iw_homedir }}/tmp/{{ iw_theme_name }}"
+
+# Unix user info
+iw_user: "iworx"
+iw_group: "iworx"
+iw_homedir: "/usr/local/interworx"
