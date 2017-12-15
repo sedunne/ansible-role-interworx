@@ -132,38 +132,6 @@
       Cookie: "{{ login.set_cookie }}"
     validate_certs: "no"
 
-- name: Get Theme
-  git:
-    force="yes"
-    depth="1"
-    repo="{{ iw_theme_git_repo }}"
-    version="{{ iw_theme_git_version | default('master') }}"
-    dest="{{ iw_homedir }}/tmp/{{ iw_theme_name }}"
-  when: iw_theme_name != "" and iw_theme_git_repo != ""
-
-- name: Zip Theme
-  archive:
-    path="{{ iw_homedir }}/tmp/{{ iw_theme_name }}/*"
-    dest="{{ iw_homedir }}/tmp/{{ iw_theme_name }}.zip"
-    format="zip"
-  when: iw_theme_name != "" and iw_theme_git_repo != ""
-
-- name: Install Theme
-  command: >
-    nodeworx
-      -unv
-      -c Themes
-      -a add
-      --archive {{ iw_homedir }}/tmp/{{ iw_theme_name }}.zip
-  when: iw_theme_name != "" and iw_theme_git_repo != ""
-  ignore_errors: true
-
-- name: Set Theme as Default
-  command: >
-    nodeworx -un
-    -c Users
-    -a edit
-    --user {{ iw_master_email }}
-    --theme {{ iw_theme_name }}
+- include: theme.yml
   when: iw_theme_name != "" and iw_theme_git_repo != ""
   ignore_errors: true
