@@ -38,6 +38,6 @@ iw_theme_git_version: ""
 iw_theme_tmp_dir: "{{ iw_homedir }}/tmp/{{ iw_theme_name }}"
 
 # Unix user info
-iw_user: "iworx"
-iw_group: "iworx"
+iw_unix_user: "iworx"
+iw_unix_group: "iworx"
 iw_homedir: "/usr/local/interworx"

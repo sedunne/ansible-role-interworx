@@ -30,8 +30,7 @@
 
 - name: Remove The Theme .git Dir
   file:
-    path="{{ iw_theme_tmp_dir }}/.git"
-    recurse="yes"
+    path="{{ iw_theme_tmp_dir }}/.git/"
     state="absent"
 
 - name: Zip Theme
@@ -59,5 +58,5 @@
 
 - name: Remove Tmp Theme
   file:
-    src="{{ iw_tmp_theme_dir }}.zip"
+    src="{{ iw_theme_tmp_dir }}.zip"
     state="absent"
