@@ -29,7 +29,8 @@ iw_ns3: ""
 iw_accept_eula: true
 
 # Interworx install script url
-iw_install_script_url: "interworx.com/inst.sh"
+iw_install_script_url: 'http://interworx.com/inst.sh'
+iw_install_script_loc: '/tmp/iworx-cp-install.sh'
 
 # Custom IWorx theme
 iw_theme_name: ""
@@ -43,4 +44,12 @@ iw_unix_group: "iworx"
 iw_homedir: "/usr/local/interworx"
 
 # SSL services
+iw_setup_ssl: true
 iw_ssl_email: "ssl-anchor@no-reply.net"
+
+# Version of interworx-cli
+iw_cli_pkg_state: 'latest'
+
+## below is only used for testing in docker due to issues modifying hosts file
+## should always be false unless running inside docker
+iw_skip_hosts_edit: false

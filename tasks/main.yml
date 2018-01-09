@@ -7,26 +7,43 @@
     - iw_master_password == "" or iw_master_email == "" or iw_license_key == ""
     - iw_activate_license
 
+## the dumb change and failed options are b/c of how the interworx package gets installed.
+## tried using package and check mode, but since a repo doesn't exist until the script runs, it can't find a package,
+##  and gives another error b/c of that.
+- name: Check if Interworx is Installed
+  command: rpm -qi interworx
+  register: iw_is_inst
+  changed_when: no
+  failed_when: no
+  tags:
+    - skip_ansible_lint ## lint gets triggered b/c of using direct rpm command
+
+- name: Fetch Interworx Installer
+  get_url:
+    url={{ iw_install_script_url }}
+    dest={{ iw_install_script_loc }}
+  when: iw_is_inst.rc != 0
+
 - name: Install Interworx
-  shell: >
-    curl -sL {{ iw_install_script_url }} > iworx-cp-install.sh &&
-    sh iworx-cp-install.sh -l -r {{ iw_release_channel }}
+  command: /bin/sh {{ iw_install_script_loc }} -l -r {{ iw_release_channel }}
   become: yes
   async: 1500
   register: iworx_install_result
+  when:
+    - iw_is_inst.rc != 0
 
 - name: Check Interworx Install Script Result
   debug:
     var=iworx_install_result.stdout_lines
-  failed_when: true
-  when:
-    - iworx_install_result.rc != 0
+  failed_when: iworx_install_result.rc != 0
+  when: iw_is_inst.rc !=0
 
 - name: Seed /etc/hosts With Correct License IP
   lineinfile:
     path="/etc/hosts"
     line="207.32.181.150 license.interworx.info license.interworx.com"
     insertafter="EOF"
+  when: not iw_skip_hosts_edit
 
 - name: Activate Interworx License
   shell: >
@@ -38,28 +55,27 @@
   become: yes
   failed_when: false
   register: goiworx_result
-  when:
-    - iw_activate_license
+  when: (iw_is_inst.rc != 0 and iw_activate_license)
+  tags:
+    - skip_ansible_lint ## maybe this can be switched to command, but tbh didn't want to generate a license just to try
 
 - name: Remove Seed Line From /etc/hosts
   lineinfile:
     state="absent"
     path="/etc/hosts"
     line="207.32.181.150 license.interworx.info license.interworx.com"
+  when: not iw_skip_hosts_edit
 
 - name: Check Interworx License Activation Result
   debug:
     var=goiworx_result.stdout_lines
   failed_when: true
-  when:
-    - iw_activate_license
-    - goiworx_result.rc != 0
-
+  when: (iw_is_inst.rc != 0 and iw_activate_license and goiworx_result.rc != 0)
 
 - name: Install Interworx CLI
   package:
     name="interworx-cli"
-    state="latest"
+    state={{ iw_cli_pkg_state }}
 
 - name: Accept Interworx EULA
   ini_file:
@@ -148,5 +164,5 @@
   ignore_errors: true
 
 - include: ssl-services.yml
-  when: iw_activate_license
+  when: iw_setup_ssl
   ignore_errors: true
