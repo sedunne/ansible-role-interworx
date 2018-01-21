@@ -127,6 +127,8 @@
       Content-Type: "application/x-www-form-urlencoded"
     validate_certs: "no"
   register: login
+  when:
+    - iw_activate_license
 
 - name: Test Logging Into Interworx Step 2
   uri:
@@ -135,6 +137,8 @@
     headers:
       Cookie: "{{ login.set_cookie }}"
     validate_certs: "no"
+  when:
+    - iw_activate_license
 
 - include: theme.yml
   when:
