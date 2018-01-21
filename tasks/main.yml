@@ -144,4 +144,5 @@
   ignore_errors: true
 
 - include: ssl-services.yml
+  when: iw_activate_license
   ignore_errors: true
