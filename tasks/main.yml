@@ -80,6 +80,7 @@
     no_extra_spaces="yes"
   when:
     - iw_ns1 != ""
+    - iw_activate_license
 
 - name: Set iworx.ini ns2
   ini_file:
@@ -90,6 +91,7 @@
     no_extra_spaces="yes"
   when:
     - iw_ns2 != ""
+    - iw_activate_license
 
 - name: Set iworx.ini ns3
   ini_file:
@@ -100,6 +102,7 @@
     no_extra_spaces="yes"
   when:
     - iw_ns3 != ""
+    - iw_activate_license
 
 - name: Set Default NS
   command: >
@@ -112,6 +115,7 @@
     --ns3="{{ iw_ns3 }}"
   when:
     - iw_ns1 != "" or iw_ns2 != "" or iw_ns3 != ""
+    - iw_activate_license
 
 - name: Test Logging Into Interworx
   uri:
@@ -133,7 +137,10 @@
     validate_certs: "no"
 
 - include: theme.yml
-  when: iw_theme_name != "" and iw_theme_git_repo != ""
+  when:
+    - iw_theme_name != ""
+    - iw_theme_git_repo != ""
+    - iw_activate_license
   ignore_errors: true
 
 - include: ssl-services.yml
