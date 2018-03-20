@@ -48,6 +48,8 @@
       -c Themes
       -a add
       --archive {{ iw_theme_tmp_dir }}.zip
+  tags:
+    - skip_ansible_lint
 
 - name: Set Theme as Default
   command: >
@@ -56,6 +58,8 @@
     -a edit
     --user {{ iw_master_email }}
     --theme {{ iw_theme_name }}
+  tags:
+    - skip_ansible_lint
 
 - name: Remove Tmp Theme
   file:

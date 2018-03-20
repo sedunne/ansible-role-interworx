@@ -8,6 +8,8 @@
 - name: Generate a Random Password
   set_fact:
     random_password: "{{ lookup('password', '/dev/null length=24 chars=ascii_letters') }}"
+  when:
+    - vhost_file_result.stat.exists == false
 
 - name: Add Server Name Siteworx Account
   command: >
@@ -58,6 +60,7 @@
     -a edit
     --plugin_name lets-encrypt
     --status 1
+  changed_when: false
   register: letsencrypt_enable_result
 
 - name: Check For Existing Certificate File
@@ -88,3 +91,5 @@
     --domain "{{ ansible_fqdn }}"
     --restart_now 1
   register: install_cert_result
+  when:
+    - cert_file_result.stat.exists == false
