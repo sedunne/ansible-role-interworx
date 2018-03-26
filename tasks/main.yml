@@ -38,6 +38,22 @@
   failed_when: iworx_install_result.rc != 0
   when: iw_is_inst.rc !=0
 
+- name: Remove Base PHP packages
+  package:
+    name="{{ item }}"
+    state="absent"
+  with_items: "{{ iw_symlink_base_php_packages }}"
+  when: iw_symlink_base_php
+
+- name: Symlink Base PHP
+  file:
+    src="{{ iw_symlink_base_php_path }}"
+    dest="/usr/bin/php"
+    owner="root"
+    group="root"
+    state="link"
+  when: iw_symlink_base_php
+
 - name: Seed /etc/hosts With Correct License IP
   lineinfile:
     path="/etc/hosts"
