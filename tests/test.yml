@@ -5,7 +5,6 @@
     iw_master_email: 'citests@nexcess.net'
     iw_master_password: 'nexcesscitests'
     iw_license_key: 'NEXCESS_CI_LICENSE'
-    iw_setup_ssl: false
 
   pre_tasks:
     - name: ensure /etc/sysconfig/network file

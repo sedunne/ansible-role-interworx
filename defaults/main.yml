@@ -44,7 +44,6 @@ iw_unix_group: "iworx"
 iw_homedir: "/usr/local/interworx"
 
 # SSL services
-iw_setup_ssl: true
 iw_ssl_email: "ssl-anchor@no-reply.net"
 
 # Version of interworx-cli
