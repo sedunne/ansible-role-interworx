@@ -61,3 +61,5 @@ iw_symlink_base_php_packages:
   - "php-devel"
   - "php-cli"
   - "php-pear"
+
+iw_generate_apikey: true
