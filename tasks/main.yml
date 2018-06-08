@@ -172,6 +172,11 @@
   when:
     - iw_activate_license
 
+- name: Generate API Key
+  shell: >
+    nodeworx -un -c Apikey -a generate
+  when: iw_generate_apikey
+
 - include: theme.yml
   when:
     - iw_theme_name != ""
